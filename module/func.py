@@ -86,7 +86,7 @@ def movie_thread(start_frame, end_frame):
     # print(target_video_frame)
     # print(end_video_frame)
     # 算好以後設定video 開始點
-    video_capture.set(1, target_video_frame)
+    video_capture.set(1, target_video_frame-1)
 
     # 處理聲音
     # player = MediaPlayer('./documents/test_video.mp4')
@@ -103,9 +103,9 @@ def movie_thread(start_frame, end_frame):
     count, length = 0, end_video_frame - target_video_frame
     while not end_thread:
         if count > length:
-            end_thread = True
+            while not end_thread:
+                pass
             break
-        cv2.waitKey(running_frame_delay)  # 利用這邊wait key的waiting time(ms)來控制後續movie_log裡面的播放速度(偵)
 
         # 底下這坨是在組合前面拿到的各個影像
         ret, video_frame = video_capture.read()
@@ -126,6 +126,8 @@ def movie_thread(start_frame, end_frame):
             if end_thread:
                 break
             continue
+        cv2.waitKey(running_frame_delay)  # 利用這邊wait key的waiting time(ms)來控制後續movie_log裡面的播放速度(偵)
+
     cv2.destroyAllWindows()
     video_capture.release()
     start_thread = True
