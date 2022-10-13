@@ -165,15 +165,15 @@ def partial_data_log(start_frame, end_frame):
                 if left_modified and right_modified:
                     pass
                 elif left_modified:
-                    rx = np.append(rx, temp[1])
+                    rx = np.append(rx, prev_data_time)
                     ry = np.append(ry, [0.0])
                 elif right_modified:
-                    lx = np.append(lx, temp[1])
+                    lx = np.append(lx, prev_data_time)
                     ly = np.append(ly, [0.0])
             else: # 兩手都沒資料 各塞一個空值進去
-                lx = np.append(lx, temp[1])
+                lx = np.append(lx, prev_data_time)
                 ly = np.append(ly, [0.0])
-                rx = np.append(rx, temp[1])
+                rx = np.append(rx, prev_data_time)
                 ry = np.append(ry, [0.0])
             prev_data_time = temp[1]
             left_modified = False
