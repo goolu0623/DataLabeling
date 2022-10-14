@@ -4,7 +4,8 @@ import math
 import numpy as np
 import tkinter as tk
 import cv2
-from ffpyplayer.player import MediaPlayer
+# from ffpyplayer.player import MediaPlayer
+
 
 def set_global_end_thread(status):
     global end_thread
@@ -14,7 +15,7 @@ def set_global_end_thread(status):
 
 def set_global_start_thread(status):
     global start_thread
-    start_thread = True
+    start_thread = status
     return
 
 
@@ -62,7 +63,7 @@ def movie_thread(start_frame, end_frame):
     # 讀影片資料
 
     video_capture = cv2.VideoCapture('./documents/test_video.mp4')
-    video_length = video_capture.get(cv2.CAP_PROP_FRAME_COUNT)
+    # video_length = video_capture.get(cv2.CAP_PROP_FRAME_COUNT)
 
     # 用在影片的para們
     global video_frame_rate, running_frame_delay, speedup, pause
@@ -73,23 +74,22 @@ def movie_thread(start_frame, end_frame):
 
     # 算input區間段的data_signal 並且回傳那個"真實時間點" 用來對應影片時間點
     start_of_full_data_time, end_of_full_data_time, start_of_target_data_time, end_of_target_data_time = partial_data_log(start_frame, end_frame)
-    print(start_of_target_data_time, end_of_target_data_time, start_of_full_data_time, end_of_full_data_time)
+    # print(start_of_target_data_time, end_of_target_data_time, start_of_full_data_time, end_of_full_data_time)
     # 拆成 hour:minute:second:frame 的格式
     sth, stm, sts, stf = start_of_target_data_time.split(':')
     eth, etm, ets, etf = end_of_target_data_time.split(':')
     sdh, sdm, sds, sdf = start_of_full_data_time.split(':')
-    edh, edm, eds, edf = end_of_full_data_time.split(':')
+    # edh, edm, eds, edf = end_of_full_data_time.split(':')
     # 計算出目標偵的對應影片點
     target_video_frame = ((int(sth) * 60 * 60 + int(stm) * 60 + int(sts)) - (int(sdh) * 60 * 60 + int(sdm) * 60 + int(sds))) * video_frame_rate
     end_video_frame = ((int(eth) * 60 * 60 + int(etm) * 60 + int(ets)) - (int(sdh) * 60 * 60 + int(sdm) * 60 + int(sds))) * video_frame_rate
-    print(target_video_frame)
-    print(end_video_frame)
+    # print(target_video_frame)
+    # print(end_video_frame)
     # 算好以後設定video 開始點
-    video_capture.set(1, target_video_frame)
+    video_capture.set(1, target_video_frame-1)
 
     # 處理聲音
-    player = MediaPlayer('./documents/test_video.mp4')
-
+    # player = MediaPlayer('./documents/test_video.mp4')
 
     # 吃前面partial算完存的圖
     controller_plot = cv2.imread('./documents/controller_plot.png')
@@ -103,13 +103,13 @@ def movie_thread(start_frame, end_frame):
     count, length = 0, end_video_frame - target_video_frame
     while not end_thread:
         if count > length:
-            end_thread = True
+            while not end_thread:
+                pass
             break
-        key = cv2.waitKeyEx(running_frame_delay)  # 利用這邊waitkey的waiting time(ms)來控制後續movie_log裡面的播放速度(偵)
 
         # 底下這坨是在組合前面拿到的各個影像
         ret, video_frame = video_capture.read()
-        x, y = video_frame.shape[:2]
+        # x, y = video_frame.shape[:2]
         video_frame = cv2.resize(video_frame, (1080, 800), interpolation=cv2.INTER_NEAREST)
 
         h1, w1 = video_frame.shape[:2]
@@ -126,6 +126,8 @@ def movie_thread(start_frame, end_frame):
             if end_thread:
                 break
             continue
+        cv2.waitKey(running_frame_delay)  # 利用這邊wait key的waiting time(ms)來控制後續movie_log裡面的播放速度(偵)
+
     cv2.destroyAllWindows()
     video_capture.release()
     start_thread = True
@@ -140,32 +142,67 @@ def partial_data_log(start_frame, end_frame):
     previous = data[start_frame]
     data_start_time, data_end_time = (data[0].split())[1], (data[len(data) - 1].split())[1]
     target_start_time, target_end_time = (data[start_frame].split())[1], (data[end_frame].split())[1]
+    prev_data_time = 0
+    left_modified = False
+    right_modified = False
     for each in np.array(data[start_frame + 1:end_frame]):
-        temp = previous.split()
-        if 'Left' in each or 'Right' in each:
-            if 'Left' in previous:
+        temp = each.split()
+        if 'Left' in each or 'Right' in each: # 現在是左右手訊號
+            if prev_data_time == 0:
+                print("error: data no start with HMD")
+            elif 'Left' in each:
                 lx = np.append(lx, temp[1])
                 ly = np.append(ly, float(temp[3]))
-            elif 'Right' in previous:
+                left_modified = True
+            elif 'Right' in each:
                 rx = np.append(rx, temp[1])
                 ry = np.append(ry, float(temp[3]))
+                right_modified = True
         else:
-            if 'Left' in previous:
-                lx = np.append(lx, temp[1])
-                ly = np.append(ly, float(temp[3]))
-                rx = np.append(rx, temp[1])
-                ry = np.append(ry, [0.0])
-            elif 'Right' in previous:
+            if prev_data_time == 0:
+                pass
+            elif left_modified or right_modified: # 兩手有資料
+                if left_modified and right_modified:
+                    pass
+                elif left_modified:
+                    rx = np.append(rx, temp[1])
+                    ry = np.append(ry, [0.0])
+                elif right_modified:
+                    lx = np.append(lx, temp[1])
+                    ly = np.append(ly, [0.0])
+            else: # 兩手都沒資料 各塞一個空值進去
                 lx = np.append(lx, temp[1])
                 ly = np.append(ly, [0.0])
                 rx = np.append(rx, temp[1])
-                ry = np.append(ry, float(temp[3]))
-            else:
-                lx = np.append(lx, temp[1])
-                ly = np.append(ly, [0.0])
-                rx = np.append(rx, temp[1])
                 ry = np.append(ry, [0.0])
-        previous = each
+            prev_data_time = temp[1]
+            left_modified = False
+            right_modified = False
+        # temp = previous.split()
+        # if 'Left' in each or 'Right' in each: # 現在是左右手訊號
+        #     if 'Left' in previous:
+        #         lx = np.append(lx, temp[1])
+        #         ly = np.append(ly, float(temp[3]))
+        #     elif 'Right' in previous:
+        #         rx = np.append(rx, temp[1])
+        #         ry = np.append(ry, float(temp[3]))
+        # else: # 現在不是左右手訊號
+        #     if 'Left' in previous:
+        #         lx = np.append(lx, temp[1])
+        #         ly = np.append(ly, float(temp[3]))
+        #         rx = np.append(rx, temp[1])
+        #         ry = np.append(ry, [0.0])
+        #     elif 'Right' in previous:
+        #         lx = np.append(lx, temp[1])
+        #         ly = np.append(ly, [0.0])
+        #         rx = np.append(rx, temp[1])
+        #         ry = np.append(ry, float(temp[3]))
+        #     else:
+        #         lx = np.append(lx, temp[1])
+        #         ly = np.append(ly, [0.0])
+        #         rx = np.append(rx, temp[1])
+        #         ry = np.append(ry, [0.0])
+        # previous = each
     fig, ax = plt.subplots(2, 1, figsize=(10, 4))
     ax[0].set_title('Left Controller')
     ax[0].plot(lx, ly)
