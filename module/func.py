@@ -4,6 +4,7 @@ import math
 import numpy as np
 import tkinter as tk
 import cv2
+from tkinter import filedialog
 # from ffpyplayer.player import MediaPlayer
 
 
@@ -33,6 +34,9 @@ def button_thread():
     exit_button = tk.Button(root, text='exit', command=button_exit, width=10).grid(row=0, column=8, rowspan=4, columnspan=4)
     speedup_button = tk.Button(root, text='+', command=button_speedup, width=25).grid(row=12, column=0, rowspan=2, columnspan=6)
     speeddown_button = tk.Button(root, text='-', command=button_speeddown, width=25).grid(row=12, column=6, rowspan=2, columnspan=6)
+    askdirectory_button=tk.Button(root, text='work directory',command=button_workdirectory, width=12).grid(row=14, column=0, rowspan=2, columnspan=4)
+    selectvideo_button = tk.Button(root, text='select video',command=button_selectvideo, width=12).grid(row=14, column=4, rowspan=2,columnspan=4)
+    selectdatalog_button = tk.Button(root, text='select datalog',command=button_selectdatalog, width=12).grid(row=14, column=8, rowspan=2, columnspan=4)
 
     # 影片時間軸相關button
     start_frame_Label = tk.Label(root, text='start of frame').grid(row=4, column=0, rowspan=2, columnspan=4)
@@ -42,6 +46,8 @@ def button_thread():
     end_frame_entry = tk.Entry(root)
     end_frame_entry.grid(row=6, column=4, rowspan=2, columnspan=4)
     apply_button = tk.Button(root, text='apply', command=button_apply, width=10).grid(row=4, column=8, rowspan=4, columnspan=4)
+    current_frame = tk.Label(root, text='current frame').grid(row=16, column=0, rowspan=4, columnspan=4)
+    current_frame = tk.Label(root, text='1').grid(row=16, column=4, rowspan=4, columnspan=4)
 
     # 紀錄事件相關button
     event_name_Label = tk.Label(root, text='event name').grid(row=8, column=0, rowspan=4, columnspan=4)
@@ -62,8 +68,11 @@ def movie_thread(start_frame, end_frame):
     start_thread = False
     # 讀影片資料
 
-    video_capture = cv2.VideoCapture('./documents/test_video.mp4')
+    video_capture = cv2.VideoCapture(button_selectvideo())
     # video_length = video_capture.get(cv2.CAP_PROP_FRAME_COUNT)
+
+    # 讀聲音資料
+    # player = MediaPlayer('./documents/test_video.mp4')
 
     # 用在影片的para們
     global video_frame_rate, running_frame_delay, speedup, pause
@@ -136,7 +145,7 @@ def movie_thread(start_frame, end_frame):
 
 
 def partial_data_log(start_frame, end_frame):
-    with open('documents/text_log_only_vib_extend_timestamp.txt', 'r') as f:
+    with open(button_selectdatalog(), 'r') as f:
         data = f.readlines()
     lx, ly, rx, ry = [], [], [], []
     previous = data[start_frame]
@@ -219,6 +228,25 @@ def partial_data_log(start_frame, end_frame):
     # plt.show()
     return data_start_time, data_end_time, target_start_time, target_end_time
 
+#Save img 抓controller_plot 重新改檔名
+
+def button_workdirectory():
+    root2 = tk.Tk()
+    root2.withdraw()
+    file_path = filedialog.askdirectory(parent=root2, initialdir='~/VibrationLabeler-master')
+    return 'file_path'
+
+def button_selectvideo():
+    root2 = tk.Tk()
+    root2.withdraw()
+    file_path = filedialog.askopenfilename(parent=root2, initialdir='~/VibrationLabeler-master')
+    return file_path
+
+def button_selectdatalog():
+    root2 = tk.Tk()
+    root2.withdraw()
+    file_path = filedialog.askopenfilename(parent=root2, initialdir='~/VibrationLabeler-master')
+    return file_path
 
 def button_record():
     global event_entry
