@@ -1,3 +1,4 @@
+import os.path
 import threading
 import matplotlib.pyplot as plt
 import math
@@ -59,16 +60,19 @@ def button_thread():
     root.mainloop()
 
 
+
 def movie_thread(start_frame, end_frame):
     global end_thread, start_thread
-
+    global workdirectory, selectvideo, selectdatalog, controller_plot_path, full_image_path
     # mutex lock 卡一下thread 避免沒關成功
     while not start_thread:
         pass
     start_thread = False
-    # 讀影片資料
 
-    video_capture = cv2.VideoCapture(button_selectvideo())
+
+
+    # 讀影片資料
+    video_capture = cv2.VideoCapture(selectvideo)
     # video_length = video_capture.get(cv2.CAP_PROP_FRAME_COUNT)
 
     # 讀聲音資料
@@ -101,11 +105,13 @@ def movie_thread(start_frame, end_frame):
     # player = MediaPlayer('./documents/test_video.mp4')
 
     # 吃前面partial算完存的圖
-    controller_plot = cv2.imread('./documents/controller_plot.png')
+    #controller_plot_path=os.path.join(workdirectory + '/controller_plot.png')
+    controller_plot = cv2.imread(controller_plot_path)
     # controller_plot = cv2.resize(controller_plot, (480, 360), interpolation=cv2.INTER_NEAREST)
 
     # pre process會把整個完整的全部vibration data做成一張圖 在這邊load進來
-    full_image = cv2.imread('./documents/full_image2.png')
+    full_image_path=os.path.join(workdirectory + '/full_image2.png')
+    full_image = cv2.imread(full_image_path)
     full_image = cv2.resize(full_image, (controller_plot.shape[1], controller_plot.shape[0]), interpolation=cv2.INTER_NEAREST)
 
     # 用一個while迴圈控制這個thread的結束
@@ -145,7 +151,9 @@ def movie_thread(start_frame, end_frame):
 
 
 def partial_data_log(start_frame, end_frame):
-    with open(button_selectdatalog(), 'r') as f:
+    global workdirectory, selectvideo, selectdatalog, controller_plot_path
+    controller_plot_path = os.path.join(workdirectory + '/controller_plot.png')
+    with open(selectdatalog, 'r') as f:
         data = f.readlines()
     lx, ly, rx, ry = [], [], [], []
     previous = data[start_frame]
@@ -224,29 +232,32 @@ def partial_data_log(start_frame, end_frame):
     ax[1].set_ylim([0, 1.1])
 
     plt.tight_layout()
-    plt.savefig('./documents/controller_plot.png')
+    plt.savefig(controller_plot_path)
     # plt.show()
     return data_start_time, data_end_time, target_start_time, target_end_time
 
 #Save img 抓controller_plot 重新改檔名
 
 def button_workdirectory():
+    global workdirectory
     root2 = tk.Tk()
     root2.withdraw()
-    file_path = filedialog.askdirectory(parent=root2, initialdir='~/VibrationLabeler-master')
-    return 'file_path'
+    workdirectory= filedialog.askdirectory(parent=root2, initialdir='~/VibrationLabeler-master')
+    return workdirectory
 
 def button_selectvideo():
+    global selectvideo
     root2 = tk.Tk()
     root2.withdraw()
-    file_path = filedialog.askopenfilename(parent=root2, initialdir='~/VibrationLabeler-master')
-    return file_path
+    selectvideo = filedialog.askopenfilename(parent=root2, initialdir='~/VibrationLabeler-master')
+    return selectvideo
 
 def button_selectdatalog():
+    global selectdatalog
     root2 = tk.Tk()
     root2.withdraw()
-    file_path = filedialog.askopenfilename(parent=root2, initialdir='~/VibrationLabeler-master')
-    return file_path
+    selectdatalog = filedialog.askopenfilename(parent=root2, initialdir='~/VibrationLabeler-master')
+    return selectdatalog
 
 def button_record():
     global event_entry
