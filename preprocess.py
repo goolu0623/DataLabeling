@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from time import sleep
-from tqdm import tqdm
+# from tqdm import tqdm
 
 
 def data_preprocess():
@@ -58,7 +58,7 @@ def data_preprocess():
 
 
 def full_data_log():
-    with open('documents/text_log_only_vib_without_symmetry.txt', 'r') as f:
+    with open('documents/text_log_only_vib_extend_timestamp.txt', 'r') as f:
         data = f.readlines()
     start_frame, end_frame = 0, len(data) - 1
     lx, ly, rx, ry = [], [], [], []
@@ -101,7 +101,7 @@ def full_data_log():
     ax[1].set_ylim([0, 1.1])
 
     plt.tight_layout()
-    plt.savefig('./documents/without_symmetry_image2.png')
+    plt.savefig('./documents/full_image2.png')
 
     return
 
@@ -148,14 +148,14 @@ def split_symmetry_data():
 
 
 # # Progress Bar
-for i in tqdm(range(1, 101)):
+# for i in tqdm(range(1, 101)):
 
-    # split_symmetry_data()
-    full_data_log()
+#     # split_symmetry_data()
+#     full_data_log()
 
 
-    sleep(0.01)
-sleep(0.5)
+#     sleep(0.01)
+# sleep(0.5)
 
 
 
