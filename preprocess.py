@@ -1,5 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from time import sleep
+from tqdm import tqdm
 
 
 def data_preprocess():
@@ -56,7 +58,7 @@ def data_preprocess():
 
 
 def full_data_log():
-    with open('documents/text_log_only_vib_extend_timestamp.txt', 'r') as f:
+    with open('documents/text_log_only_vib_without_symmetry.txt', 'r') as f:
         data = f.readlines()
     start_frame, end_frame = 0, len(data) - 1
     lx, ly, rx, ry = [], [], [], []
@@ -99,11 +101,61 @@ def full_data_log():
     ax[1].set_ylim([0, 1.1])
 
     plt.tight_layout()
-    plt.savefig('./documents/full_image2.png')
+    plt.savefig('./documents/without_symmetry_image2.png')
 
     return
 
 
+# def split_symmetry_data():
+#     with open('documents/text_log_only_vib_extend_timestamp.txt', 'w') as f:
+#         data = f.readlines()
+    
+#     i = 0
+#     while i < len(data):
+#         if data[i, 0:18] == data[i+1, 0:18]:
+
+
+
+
+
+def split_symmetry_data():
+    with open('documents/text_log_only_vib_extend_timestamp.txt', 'r') as f:
+        data = f.readlines()
+
+    with open('documents/text_log_only_vib_without_symmetry.txt', 'w') as f:
+
+        all_list = []
+        for each in data:
+            each_list = each.split(' ', 3) 
+            all_list.append(each_list)
+
+        for i in range(len(all_list)-1):
+            first = all_list[i]
+            second = all_list[i+1]
+            
+            if len(first) == 4 and len(second) == 4 and first[1] == second[1] and first[3] == second[3] :
+                data[i] = ['']
+                data[i + 1] = ['']
+                f.writelines(data[i])
+                f.writelines(data[i+1])
+
+            else:
+                f.writelines(data[i])
+
+
+
+
+
+
+# # Progress Bar
+for i in tqdm(range(1, 101)):
+
+    # split_symmetry_data()
+    full_data_log()
+
+
+    sleep(0.01)
+sleep(0.5)
 
 
 
