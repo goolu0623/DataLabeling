@@ -3,7 +3,6 @@ import matplotlib.pyplot as plt
 from time import sleep
 # from tqdm import tqdm
 
-
 def data_preprocess():
     # 先讀資料
     with open('./documents/test_log.txt', 'r') as f:
@@ -58,7 +57,7 @@ def data_preprocess():
 
 
 def full_data_log():
-    with open('./documents/text_log_only_vib_extend_timestamp.txt', 'r') as f:
+    with open('documents/text_log_only_vib_extend_timestamp.txt', 'r') as f:
         data = f.readlines()
     start_frame, end_frame = 0, len(data) - 1
     lx, ly, rx, ry = [], [], [], []
@@ -106,7 +105,6 @@ def full_data_log():
     return
 
 
-
 def split_symmetry_data():
     with open('documents/text_log_only_vib_extend_timestamp.txt', 'r') as f:
         data = f.readlines()
@@ -123,7 +121,7 @@ def split_symmetry_data():
             second = all_list[i+1]
             
             if len(first) == 4 and len(second) == 4 and first[1] == second[1] and first[3] == second[3] :
-                if 'Right' in data[i] and 'Left' in data[i + 1]:
+                if 'Right' in data[i] and 'Left' in data[i + 1] or 'Left' in data[i] and 'Right' in data[i + 1]:
                     data[i] = ['']
                     data[i + 1] = ['']
                     f.writelines(data[i])
@@ -154,7 +152,7 @@ def only_symmetry_data():
                 f.writelines(data[i])    
             else:              
                 if len(first) == 4 and len(second) == 4 and first[1] == second[1] and first[3] == second[3] :
-                    if 'Right' in data[i] and 'Left' in data[i + 1]:
+                    if 'Right' in data[i] and 'Left' in data[i + 1] or 'Left' in data[i] and 'Right' in data[i + 1]:
                         f.writelines(data[i])
                         f.writelines(data[i+1])
                     else:    
