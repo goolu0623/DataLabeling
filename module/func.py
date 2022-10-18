@@ -1,12 +1,13 @@
-import os.path
+import os
+import shutil
 import threading
 import matplotlib.pyplot as plt
 import math
 import numpy as np
 import tkinter as tk
 import cv2
+import re
 from tkinter import filedialog
-
 
 # from ffpyplayer.player import MediaPlayer
 
@@ -49,8 +50,8 @@ def button_thread():
     end_frame_entry = tk.Entry(root)
     end_frame_entry.grid(row=6, column=4, rowspan=2, columnspan=4)
     apply_button = tk.Button(root, text='apply', command=button_apply, width=10).grid(row=4, column=8, rowspan=4, columnspan=4)
-    current_frame = tk.Label(root, text='current frame').grid(row=16, column=0, rowspan=4, columnspan=4)
-    current_frame = tk.Label(root, text='1').grid(row=16, column=4, rowspan=4, columnspan=4)
+    #current_frame = tk.Label(root, text='current frame').grid(row=16, column=0, rowspan=4, columnspan=4)
+    #current_frame = tk.Label(root, text='1').grid(row=16, column=4, rowspan=4, columnspan=4)
 
     # 紀錄事件相關button
     event_name_Label = tk.Label(root, text='event name').grid(row=8, column=0, rowspan=4, columnspan=4)
@@ -58,9 +59,14 @@ def button_thread():
     event_entry.grid(row=8, column=4, rowspan=4, columnspan=4)
     record_button = tk.Button(root, text='record', command=button_record, width=10).grid(row=8, column=8, rowspan=4, columnspan=4)
 
+    #儲存圖片button
+    save_img_label= tk.Label(root, text='Image name').grid(row=12, column=0, rowspan=4, columnspan=4)
+    img_entry = tk.Entry(root)
+    img_entry.grid(row=12, column=4, rowspan=4, columnspan=4)
+    save_button = tk.Button(root, text='save', command=save_img, width=10).grid(row=12, column=8, rowspan=4, columnspan=4)
+    
     # 循環吃button狀態
     root.mainloop()
-
 
 def movie_thread(start_frame, end_frame):
     global end_thread, start_thread
@@ -109,7 +115,7 @@ def movie_thread(start_frame, end_frame):
     # controller_plot = cv2.resize(controller_plot, (480, 360), interpolation=cv2.INTER_NEAREST)
 
     # pre process會把整個完整的全部vibration data做成一張圖 在這邊load進來
-    full_image_path = os.path.join(workdirectory + '/full_image2.png')
+    full_image_path=os.path.join(workdirectory + '/documents/full_image2.png')
     full_image = cv2.imread(full_image_path)
     full_image = cv2.resize(full_image, (controller_plot.shape[1], controller_plot.shape[0]), interpolation=cv2.INTER_NEAREST)
 
@@ -213,7 +219,7 @@ def movie_thread(start_frame, end_frame):
 
 def partial_data_log(start_frame, end_frame):
     global workdirectory, selectvideo, selectdatalog, controller_plot_path
-    controller_plot_path = os.path.join(workdirectory + '/controller_plot.png')
+    controller_plot_path = os.path.join(workdirectory + '/documents/controller_plot.png')
     with open(selectdatalog, 'r') as f:
         data = f.readlines()
     lx, ly, rx, ry = [], [], [], []
@@ -274,30 +280,50 @@ def partial_data_log(start_frame, end_frame):
     return data_start_time, data_end_time, target_start_time, target_end_time
 
 
-# Save img 抓controller_plot 重新改檔名
-
 def button_workdirectory():
     global workdirectory
     root2 = tk.Tk()
     root2.withdraw()
-    workdirectory = filedialog.askdirectory(parent=root2, initialdir='~/VibrationLabeler-master')
+    workdirectory= filedialog.askdirectory(parent=root2, initialdir='~/VibrationLabeler-master')
     return workdirectory
-
 
 def button_selectvideo():
     global selectvideo
     root2 = tk.Tk()
     root2.withdraw()
-    selectvideo = filedialog.askopenfilename(parent=root2, initialdir='~/VibrationLabeler-master')
+    selectvideo = filedialog.askopenfilename(title='Select test video', parent=root2, initialdir='~/VibrationLabeler-master')
     return selectvideo
-
 
 def button_selectdatalog():
     global selectdatalog
     root2 = tk.Tk()
     root2.withdraw()
-    selectdatalog = filedialog.askopenfilename(parent=root2, initialdir='~/VibrationLabeler-master')
+    selectdatalog = filedialog.askopenfilename(title='Select text_log_only_vib_extend_timestamp',parent=root2, initialdir='~/VibrationLabeler-master')
     return selectdatalog
+
+#Save img 抓controller_plot 重新改檔名
+def save_img():
+    global img_entry, controller_plot_path
+    name_of_image = img_entry.get()
+    old_controller_plot= controller_plot_path
+    new_controller_plot= os.path.join(workdirectory+ '/image/'+ img_entry.get() +'.png')
+    #若沒有image資料夾就建一個
+    if not os.path.exists('image'):
+        os.mkdir('image')
+    directory, file_name = os.path.split(new_controller_plot)
+    #若檔名重複則在後面增加編號
+    while os.path.isfile(new_controller_plot):
+        pattern = '(\d+)\)\.'
+        if re.search(pattern, file_name) is None:
+            file_name = file_name.replace('.', '(0).')
+        else:
+            current_number = int(re.findall(pattern, file_name)[-1])
+            new_number = current_number + 1
+            file_name = file_name.replace(f'({current_number}).', f'({new_number}).')
+            new_controller_plot= os.path.join(directory + os.sep + file_name)
+
+    shutil.copyfile(old_controller_plot, new_controller_plot)
+    return
 
 
 def button_record():
