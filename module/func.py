@@ -53,6 +53,12 @@ def button_thread():
     #current_frame = tk.Label(root, text='current frame').grid(row=16, column=0, rowspan=4, columnspan=4)
     #current_frame = tk.Label(root, text='1').grid(row=16, column=4, rowspan=4, columnspan=4)
 
+    # 紀錄事件相關button
+    event_name_Label = tk.Label(root, text='event name').grid(row=8, column=0, rowspan=4, columnspan=4)
+    event_entry = tk.Entry(root)
+    event_entry.grid(row=8, column=4, rowspan=4, columnspan=4)
+    record_button = tk.Button(root, text='record', command=button_record, width=10).grid(row=8, column=8, rowspan=4, columnspan=4)
+
     #儲存圖片button
     save_img_label= tk.Label(root, text='Image name').grid(row=12, column=0, rowspan=4, columnspan=4)
     img_entry = tk.Entry(root)
@@ -61,7 +67,6 @@ def button_thread():
     
     # 循環吃button狀態
     root.mainloop()
-
 
 def movie_thread(start_frame, end_frame):
     global end_thread, start_thread
