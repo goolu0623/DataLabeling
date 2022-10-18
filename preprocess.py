@@ -1,6 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from time import sleep
+
+
 # from tqdm import tqdm
 
 def data_preprocess():
@@ -62,6 +64,59 @@ def full_data_log():
     start_frame, end_frame = 0, len(data) - 1
     lx, ly, rx, ry = [], [], [], []
     previous = data[start_frame]
+    for each in data[start_frame + 1:end_frame]:
+        temp = previous.split()
+        if 'Left' in each or 'Right' in each:
+            if 'Left' in previous:
+                lx.append(temp[1])
+                ly.append(float(temp[3]))
+            elif 'Right' in previous:
+                rx.append(temp[1])
+                ry.append(float(temp[3]))
+        else:
+            if 'Left' in previous:
+                lx.append(temp[1])
+                ly.append(float(temp[3]))
+                rx.append(temp[1])
+                ry.append(0.0)
+            elif 'Right' in previous:
+                lx.append(temp[1])
+                ly.append(0.0)
+                rx.append(temp[1])
+                ry.append(float(temp[3]))
+            else:
+                lx.append(temp[1])
+                ly.append(0.0)
+                rx.append(temp[1])
+                ry.append(0.0)
+        previous = each
+    lx = np.array(lx)
+    ly = np.array(ly)
+    rx = np.array(rx)
+    ry = np.array(ry)
+    fig, ax = plt.subplots(2, 1, figsize=(10, 4))
+    ax[0].set_title('Left Controller')
+    ax[0].plot(lx, ly)
+    ax[1].set_title('Right Controller')
+    ax[1].plot(rx, ry)
+    x_major_locator = plt.MultipleLocator((end_frame - start_frame) / 6)
+    ax[0].xaxis.set_major_locator(x_major_locator)
+    ax[1].xaxis.set_major_locator(x_major_locator)
+    ax[0].set_ylim([0, 1.1])
+    ax[1].set_ylim([0, 1.1])
+
+    plt.tight_layout()
+    plt.savefig('./documents/full_image2.png')
+
+    return
+
+
+def full_data_log_np():
+    with open('documents/text_log_only_vib_extend_timestamp.txt', 'r') as f:
+        data = f.readlines()
+    start_frame, end_frame = 0, len(data) - 1
+    lx, ly, rx, ry = [], [], [], []
+    previous = data[start_frame]
     for each in np.array(data[start_frame + 1:end_frame]):
         temp = previous.split()
         if 'Left' in each or 'Right' in each:
@@ -88,7 +143,7 @@ def full_data_log():
                 rx = np.append(rx, temp[1])
                 ry = np.append(ry, [0.0])
         previous = each
-    fig, ax = plt.subplots(2, 1,figsize=(10,4))
+    fig, ax = plt.subplots(2, 1, figsize=(10, 4))
     ax[0].set_title('Left Controller')
     ax[0].plot(lx, ly)
     ax[1].set_title('Right Controller')
@@ -113,24 +168,23 @@ def split_symmetry_data():
 
         all_list = []
         for each in data:
-            each_list = each.split(' ', 3) 
+            each_list = each.split(' ', 3)
             all_list.append(each_list)
 
-        for i in range(len(all_list)-1):
+        for i in range(len(all_list) - 1):
             first = all_list[i]
-            second = all_list[i+1]
-            
-            if len(first) == 4 and len(second) == 4 and first[1] == second[1] and first[3] == second[3] :
+            second = all_list[i + 1]
+
+            if len(first) == 4 and len(second) == 4 and first[1] == second[1] and first[3] == second[3]:
                 if 'Right' in data[i] and 'Left' in data[i + 1] or 'Left' in data[i] and 'Right' in data[i + 1]:
                     data[i] = ['']
                     data[i + 1] = ['']
                     f.writelines(data[i])
-                    f.writelines(data[i+1])
-                else:    
+                    f.writelines(data[i + 1])
+                else:
                     f.writelines(data[i])
             else:
                 f.writelines(data[i])
-    
 
 
 def only_symmetry_data():
@@ -141,34 +195,32 @@ def only_symmetry_data():
 
         all_list = []
         for each in data:
-            each_list = each.split(' ', 3) 
+            each_list = each.split(' ', 3)
             all_list.append(each_list)
 
-        for i in range(len(all_list)-1):
+        for i in range(len(all_list) - 1):
             first = all_list[i]
-            second = all_list[i+1]
-            
+            second = all_list[i + 1]
+
             if len(first) == 2:
-                f.writelines(data[i])    
-            else:              
-                if len(first) == 4 and len(second) == 4 and first[1] == second[1] and first[3] == second[3] :
+                f.writelines(data[i])
+            else:
+                if len(first) == 4 and len(second) == 4 and first[1] == second[1] and first[3] == second[3]:
                     if 'Right' in data[i] and 'Left' in data[i + 1] or 'Left' in data[i] and 'Right' in data[i + 1]:
                         f.writelines(data[i])
-                        f.writelines(data[i+1])
-                    else:    
-                        data[i] = [(all_list[i])[0] , ' ', (all_list[i])[1]]
+                        f.writelines(data[i + 1])
+                    else:
+                        data[i] = [(all_list[i])[0], ' ', (all_list[i])[1]]
                         f.writelines(data[i])
-                        f.writelines('\n')                        
+                        f.writelines('\n')
                 else:
-                    data[i] = [(all_list[i])[0] , ' ', (all_list[i])[1]]
-                    f.writelines(data[i])   
-                    f.writelines('\n')                             
-    
+                    data[i] = [(all_list[i])[0], ' ', (all_list[i])[1]]
+                    f.writelines(data[i])
+                    f.writelines('\n')
+
+                # # # Progress Bar
 
 
-
-
-# # # Progress Bar
 # for i in tqdm(range(1, 101)):
 
 #     # split_symmetry_data()
@@ -180,6 +232,7 @@ def only_symmetry_data():
 # sleep(0.5)
 
 
-
 if __name__ == '__main__':
+    # data_preprocess()
+    # full_data_log()
     full_data_log()

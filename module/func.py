@@ -6,6 +6,8 @@ import numpy as np
 import tkinter as tk
 import cv2
 from tkinter import filedialog
+
+
 # from ffpyplayer.player import MediaPlayer
 
 
@@ -35,9 +37,9 @@ def button_thread():
     exit_button = tk.Button(root, text='exit', command=button_exit, width=10).grid(row=0, column=8, rowspan=4, columnspan=4)
     speedup_button = tk.Button(root, text='+', command=button_speedup, width=25).grid(row=12, column=0, rowspan=2, columnspan=6)
     speeddown_button = tk.Button(root, text='-', command=button_speeddown, width=25).grid(row=12, column=6, rowspan=2, columnspan=6)
-    askdirectory_button=tk.Button(root, text='work directory',command=button_workdirectory, width=12).grid(row=14, column=0, rowspan=2, columnspan=4)
-    selectvideo_button = tk.Button(root, text='select video',command=button_selectvideo, width=12).grid(row=14, column=4, rowspan=2,columnspan=4)
-    selectdatalog_button = tk.Button(root, text='select datalog',command=button_selectdatalog, width=12).grid(row=14, column=8, rowspan=2, columnspan=4)
+    askdirectory_button = tk.Button(root, text='work directory', command=button_workdirectory, width=12).grid(row=14, column=0, rowspan=2, columnspan=4)
+    selectvideo_button = tk.Button(root, text='select video', command=button_selectvideo, width=12).grid(row=14, column=4, rowspan=2, columnspan=4)
+    selectdatalog_button = tk.Button(root, text='select datalog', command=button_selectdatalog, width=12).grid(row=14, column=8, rowspan=2, columnspan=4)
 
     # 影片時間軸相關button
     start_frame_Label = tk.Label(root, text='start of frame').grid(row=4, column=0, rowspan=2, columnspan=4)
@@ -60,7 +62,6 @@ def button_thread():
     root.mainloop()
 
 
-
 def movie_thread(start_frame, end_frame):
     global end_thread, start_thread
     global workdirectory, selectvideo, selectdatalog, controller_plot_path, full_image_path
@@ -68,8 +69,6 @@ def movie_thread(start_frame, end_frame):
     while not start_thread:
         pass
     start_thread = False
-
-
 
     # 讀影片資料
     video_capture = cv2.VideoCapture(selectvideo)
@@ -99,18 +98,18 @@ def movie_thread(start_frame, end_frame):
     # print(target_video_frame)
     # print(end_video_frame)
     # 算好以後設定video 開始點
-    video_capture.set(1, target_video_frame-1)
+    video_capture.set(1, target_video_frame - 1)
 
     # 處理聲音
     # player = MediaPlayer('./documents/test_video.mp4')
 
     # 吃前面partial算完存的圖
-    #controller_plot_path=os.path.join(workdirectory + '/controller_plot.png')
+    # controller_plot_path=os.path.join(workdirectory + '/controller_plot.png')
     controller_plot = cv2.imread(controller_plot_path)
     # controller_plot = cv2.resize(controller_plot, (480, 360), interpolation=cv2.INTER_NEAREST)
 
     # pre process會把整個完整的全部vibration data做成一張圖 在這邊load進來
-    full_image_path=os.path.join(workdirectory + '/full_image2.png')
+    full_image_path = os.path.join(workdirectory + '/full_image2.png')
     full_image = cv2.imread(full_image_path)
     full_image = cv2.resize(full_image, (controller_plot.shape[1], controller_plot.shape[0]), interpolation=cv2.INTER_NEAREST)
 
@@ -150,6 +149,68 @@ def movie_thread(start_frame, end_frame):
     return
 
 
+# def partial_data_log_np(start_frame, end_frame):
+#     global workdirectory, selectvideo, selectdatalog, controller_plot_path
+#     controller_plot_path = os.path.join(workdirectory + '/controller_plot.png')
+#     with open(selectdatalog, 'r') as f:
+#         data = f.readlines()
+#     lx, ly, rx, ry = [], [], [], []
+#     previous = data[start_frame]
+#     data_start_time, data_end_time = (data[0].split())[1], (data[len(data) - 1].split())[1]
+#     target_start_time, target_end_time = (data[start_frame].split())[1], (data[end_frame].split())[1]
+#     prev_data_time = 0
+#     left_modified = False
+#     right_modified = False
+#     for each in np.array(data[start_frame + 1:end_frame]):
+#         temp = each.split()
+#         if 'Left' in each or 'Right' in each:  # 現在是左右手訊號
+#             if prev_data_time == 0:
+#                 print("error: data no start with HMD")
+#             elif 'Left' in each:
+#                 lx = np.append(lx, temp[1])
+#                 ly = np.append(ly, float(temp[3]))
+#                 left_modified = True
+#             elif 'Right' in each:
+#                 rx = np.append(rx, temp[1])
+#                 ry = np.append(ry, float(temp[3]))
+#                 right_modified = True
+#         else:
+#             if prev_data_time == 0:
+#                 pass
+#             elif left_modified or right_modified:  # 兩手有資料
+#                 if left_modified and right_modified:
+#                     pass
+#                 elif left_modified:
+#                     rx = np.append(rx, prev_data_time)
+#                     ry = np.append(ry, [0.0])
+#                 elif right_modified:
+#                     lx = np.append(lx, prev_data_time)
+#                     ly = np.append(ly, [0.0])
+#             else:  # 兩手都沒資料 各塞一個空值進去
+#                 lx = np.append(lx, prev_data_time)
+#                 ly = np.append(ly, [0.0])
+#                 rx = np.append(rx, prev_data_time)
+#                 ry = np.append(ry, [0.0])
+#             prev_data_time = temp[1]
+#             left_modified = False
+#             right_modified = False
+#     fig, ax = plt.subplots(2, 1, figsize=(10, 4))
+#     ax[0].set_title('Left Controller')
+#     ax[0].plot(lx, ly)
+#     ax[1].set_title('Right Controller')
+#     ax[1].plot(rx, ry)
+#     x_major_locator = plt.MultipleLocator((end_frame - start_frame) / 6)
+#     ax[0].xaxis.set_major_locator(x_major_locator)
+#     ax[1].xaxis.set_major_locator(x_major_locator)
+#     ax[0].set_ylim([0, 1.1])
+#     ax[1].set_ylim([0, 1.1])
+#
+#     plt.tight_layout()
+#     plt.savefig(controller_plot_path)
+#     # plt.show()
+#     return data_start_time, data_end_time, target_start_time, target_end_time
+
+
 def partial_data_log(start_frame, end_frame):
     global workdirectory, selectvideo, selectdatalog, controller_plot_path
     controller_plot_path = os.path.join(workdirectory + '/controller_plot.png')
@@ -162,64 +223,40 @@ def partial_data_log(start_frame, end_frame):
     prev_data_time = 0
     left_modified = False
     right_modified = False
-    for each in np.array(data[start_frame + 1:end_frame]):
+    for each in data[start_frame + 1:end_frame]:
         temp = each.split()
-        if 'Left' in each or 'Right' in each: # 現在是左右手訊號
+        if 'Left' in each or 'Right' in each:  # 現在是左右手訊號
             if prev_data_time == 0:
                 print("error: data no start with HMD")
             elif 'Left' in each:
-                lx = np.append(lx, temp[1])
-                ly = np.append(ly, float(temp[3]))
+                lx.append(temp[1])
+                ly.append(float(temp[3]))
                 left_modified = True
             elif 'Right' in each:
-                rx = np.append(rx, temp[1])
-                ry = np.append(ry, float(temp[3]))
+                rx.append(temp[1])
+                ry.append(float(temp[3]))
                 right_modified = True
         else:
             if prev_data_time == 0:
                 pass
-            elif left_modified or right_modified: # 兩手有資料
+            elif left_modified or right_modified:  # 兩手有資料
                 if left_modified and right_modified:
                     pass
                 elif left_modified:
-                    rx = np.append(rx, prev_data_time)
-                    ry = np.append(ry, [0.0])
+                    rx.append(prev_data_time)
+                    ry.append(0.0)
                 elif right_modified:
-                    lx = np.append(lx, prev_data_time)
-                    ly = np.append(ly, [0.0])
-            else: # 兩手都沒資料 各塞一個空值進去
-                lx = np.append(lx, prev_data_time)
-                ly = np.append(ly, [0.0])
-                rx = np.append(rx, prev_data_time)
-                ry = np.append(ry, [0.0])
+                    lx.append(prev_data_time)
+                    ly.append(0.0)
+            else:  # 兩手都沒資料 各塞一個空值進去
+                lx.append(prev_data_time)
+                ly.append(0.0)
+                rx.append(prev_data_time)
+                ry.append(0.0)
             prev_data_time = temp[1]
             left_modified = False
             right_modified = False
-        # temp = previous.split()
-        # if 'Left' in each or 'Right' in each: # 現在是左右手訊號
-        #     if 'Left' in previous:
-        #         lx = np.append(lx, temp[1])
-        #         ly = np.append(ly, float(temp[3]))
-        #     elif 'Right' in previous:
-        #         rx = np.append(rx, temp[1])
-        #         ry = np.append(ry, float(temp[3]))
-        # else: # 現在不是左右手訊號
-        #     if 'Left' in previous:
-        #         lx = np.append(lx, temp[1])
-        #         ly = np.append(ly, float(temp[3]))
-        #         rx = np.append(rx, temp[1])
-        #         ry = np.append(ry, [0.0])
-        #     elif 'Right' in previous:
-        #         lx = np.append(lx, temp[1])
-        #         ly = np.append(ly, [0.0])
-        #         rx = np.append(rx, temp[1])
-        #         ry = np.append(ry, float(temp[3]))
-        #     else:
-        #         lx = np.append(lx, temp[1])
-        #         ly = np.append(ly, [0.0])
-        #         rx = np.append(rx, temp[1])
-        #         ry = np.append(ry, [0.0])
-        # previous = each
+    lx, ly, rx, ry = np.array(lx), np.array(ly), np.array(rx), np.array(ry)
     fig, ax = plt.subplots(2, 1, figsize=(10, 4))
     ax[0].set_title('Left Controller')
     ax[0].plot(lx, ly)
@@ -236,14 +273,16 @@ def partial_data_log(start_frame, end_frame):
     # plt.show()
     return data_start_time, data_end_time, target_start_time, target_end_time
 
-#Save img 抓controller_plot 重新改檔名
+
+# Save img 抓controller_plot 重新改檔名
 
 def button_workdirectory():
     global workdirectory
     root2 = tk.Tk()
     root2.withdraw()
-    workdirectory= filedialog.askdirectory(parent=root2, initialdir='~/VibrationLabeler-master')
+    workdirectory = filedialog.askdirectory(parent=root2, initialdir='~/VibrationLabeler-master')
     return workdirectory
+
 
 def button_selectvideo():
     global selectvideo
@@ -252,12 +291,14 @@ def button_selectvideo():
     selectvideo = filedialog.askopenfilename(parent=root2, initialdir='~/VibrationLabeler-master')
     return selectvideo
 
+
 def button_selectdatalog():
     global selectdatalog
     root2 = tk.Tk()
     root2.withdraw()
     selectdatalog = filedialog.askopenfilename(parent=root2, initialdir='~/VibrationLabeler-master')
     return selectdatalog
+
 
 def button_record():
     global event_entry
