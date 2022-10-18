@@ -58,7 +58,7 @@ def data_preprocess():
 
 
 def full_data_log():
-    with open('documents/text_log_only_vib_extend_timestamp.txt', 'r') as f:
+    with open('./documents/text_log_only_vib_extend_timestamp.txt', 'r') as f:
         data = f.readlines()
     start_frame, end_frame = 0, len(data) - 1
     lx, ly, rx, ry = [], [], [], []
@@ -106,17 +106,6 @@ def full_data_log():
     return
 
 
-# def split_symmetry_data():
-#     with open('documents/text_log_only_vib_extend_timestamp.txt', 'w') as f:
-#         data = f.readlines()
-    
-#     i = 0
-#     while i < len(data):
-#         if data[i, 0:18] == data[i+1, 0:18]:
-
-
-
-
 
 def split_symmetry_data():
     with open('documents/text_log_only_vib_extend_timestamp.txt', 'r') as f:
@@ -134,24 +123,59 @@ def split_symmetry_data():
             second = all_list[i+1]
             
             if len(first) == 4 and len(second) == 4 and first[1] == second[1] and first[3] == second[3] :
-                data[i] = ['']
-                data[i + 1] = ['']
-                f.writelines(data[i])
-                f.writelines(data[i+1])
-
+                if 'Right' in data[i] and 'Left' in data[i + 1]:
+                    data[i] = ['']
+                    data[i + 1] = ['']
+                    f.writelines(data[i])
+                    f.writelines(data[i+1])
+                else:    
+                    f.writelines(data[i])
             else:
                 f.writelines(data[i])
+    
+
+
+def only_symmetry_data():
+    with open('documents/text_log_only_vib_extend_timestamp.txt', 'r') as f:
+        data = f.readlines()
+
+    with open('documents/text_log_only_vib_only_symmetry.txt', 'w') as f:
+
+        all_list = []
+        for each in data:
+            each_list = each.split(' ', 3) 
+            all_list.append(each_list)
+
+        for i in range(len(all_list)-1):
+            first = all_list[i]
+            second = all_list[i+1]
+            
+            if len(first) == 2:
+                f.writelines(data[i])    
+            else:              
+                if len(first) == 4 and len(second) == 4 and first[1] == second[1] and first[3] == second[3] :
+                    if 'Right' in data[i] and 'Left' in data[i + 1]:
+                        f.writelines(data[i])
+                        f.writelines(data[i+1])
+                    else:    
+                        data[i] = [(all_list[i])[0] , ' ', (all_list[i])[1]]
+                        f.writelines(data[i])
+                        f.writelines('\n')                        
+                else:
+                    data[i] = [(all_list[i])[0] , ' ', (all_list[i])[1]]
+                    f.writelines(data[i])   
+                    f.writelines('\n')                             
+    
 
 
 
 
-
-
-# # Progress Bar
+# # # Progress Bar
 # for i in tqdm(range(1, 101)):
 
 #     # split_symmetry_data()
-#     full_data_log()
+#     # full_data_log()
+#     only_symmetry_data()
 
 
 #     sleep(0.01)
