@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from time import sleep
 
 
-from tqdm import tqdm
+# from tqdm import tqdm
 
 def data_preprocess():
     # 先讀資料
@@ -222,17 +222,17 @@ def only_symmetry_data():
                 # # # Progress Bar
 
 
-for i in tqdm(range(1, 101)):
+# for i in tqdm(range(1, 101)):
 
-    # split_symmetry_data()
-    # full_data_log()
-    # only_symmetry_data()
-    data_preprocess()
+#     # split_symmetry_data()
+#     # full_data_log()
+#     # only_symmetry_data()
+#     data_preprocess()
 
 
 
-    sleep(0.01)
-sleep(0.5)
+#     sleep(0.01)
+# sleep(0.5)
 
 
 if __name__ == '__main__':
