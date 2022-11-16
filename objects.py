@@ -24,9 +24,6 @@ class Button:
         self.complete_data_path = os.path.join(self.work_directory + '/complete.txt')
         self.symmetric_data_path = os.path.join(self.work_directory + '/symmetry.txt')
         self.nonsymmetric_data_path = os.path.join(self.work_directory + '/nonsymmetry.txt')
-        # self.complete_data_path = filedialog.askopenfilename(parent=root, initialdir='~/VibrationLabeler-master', title='select the complete datalog')
-        # self.symmetric_data_path = filedialog.askopenfilename(parent=root, initialdir='~/VibrationLabeler-master', title='select the symmetric datalog')
-        # self.nonsymmetric_data_path = filedialog.askopenfilename(parent=root, initialdir='~/VibrationLabeler-master', title='select the nonsymmetric datalog')
         root.destroy()
 
         # 控制影片的參數
@@ -35,13 +32,11 @@ class Button:
         self.graph_type = 0
         self.playing_movie = Movie(self)
 
-    def buttonPlayClick(self):
-        self.playing_movie.play()
-        pass
-
-    def buttonPauseClick(self):
-        self.playing_movie.pause()
-        pass
+    def buttonPlayPauseClick(self):
+        if self.playing_movie.is_play:
+            self.playing_movie.pause()
+        else:
+            self.playing_movie.play()
 
     def buttonExitClick(self, root):
         if self.playing_movie is not None:
@@ -56,21 +51,10 @@ class Button:
 
     def buttonSpeedLevelChange(self, sv):
         self.playing_movie.speedChange(float(sv.get()))
-        # self.playing_movie.play_speed = float(sv.get())
-        # self.playing_movie.running_frame_delay = math.ceil(1000 / (self.playing_movie.frame_rate * self.playing_movie.play_speed))
-        # print(type(self.playing_movie.frame_rate), type(self.playing_movie.play_speed))
-
-    # def buttonSpeedUpClick(self):
-    #     self.playing_movie.play_speed += 0.25
-    #     self.playing_movie.running_frame_delay = math.ceil(1000 / (self.playing_movie.frame_rate * self.playing_movie.play_speed))
-    #
-    # def buttonSpeedDownClick(self):
-    #     self.playing_movie.play_speed -= 0.25
-    #     self.playing_movie.running_frame_delay = math.ceil(1000 / (self.playing_movie.frame_rate * self.playing_movie.play_speed))
 
     def buttonRecordClick(self, event_entry):
         name_of_event = event_entry.get()
-        events_path = os.path.join(self.work_directory + '/documents/events.txt')
+        events_path = os.path.join(self.work_directory + '/events.txt')
         with open(events_path, 'a') as f:
             f.writelines(name_of_event + ' ' + str(self.start_frame) + ' ' + str(self.end_frame) + '\n')
 
@@ -108,21 +92,18 @@ class Button:
             self.graph_type = 1
         else:
             self.graph_type = 2
-        # print(self.graph_type)
 
     def mainThread(self):
         # print('button mainThread start, id= ', threading.get_ident())
 
         # 設定基本tk window的屬性
-
         root = tk.Tk()
         root.title('Buttons')  # 視窗命名
         root.geometry('330x200')  # 定義寬高
         root.geometry('+1200+1000')  # 定義離左上多遠
 
         # 基本按鈕
-        play_button = tk.Button(master=root, text='play', command=self.buttonPlayClick, width=10)
-        pause_button = tk.Button(master=root, text='pause', command=self.buttonPauseClick, width=10)
+        play_puase_button = tk.Button(master=root, text='play/pause', command=self.buttonPlayPauseClick, width=10)
         exit_button = tk.Button(master=root, text='exit', command=lambda: self.buttonExitClick(root), width=10)
         apply_button = tk.Button(root, text='apply', command=self.buttonApplyClick, width=10)
 
@@ -132,9 +113,6 @@ class Button:
         speed_level_var = tk.StringVar()
         speed_level_var.trace('w', lambda name, index, mode, var=speed_level_var: self.buttonSpeedLevelChange(var))
         speed_level_box = ttk.Combobox(root, textvariable=speed_level_var, values=[0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2])
-
-        # speed_up_button = tk.Button(master=root, text='+', command=self.buttonSpeedUpClick, width=25)
-        # speed_down_button = tk.Button(master=root, text='-', command=self.buttonSpeedDownClick, width=25)
 
         # 選檔案路徑
         ask_directory_button = tk.Button(master=root, text='work directory', command=lambda: self.buttonAskDirectoryClick(root), width=12)  # TBD------------
@@ -161,7 +139,6 @@ class Button:
         end_frame_variable = tk.StringVar()
         end_frame_variable.trace('w', lambda name, index, mode, var=end_frame_variable: self.entryEndFrameChange(var))
         end_frame_entry = tk.Entry(root, textvariable=end_frame_variable)
-        # end_frame_entry = tk.Entry(root)
 
         # record按鈕
         event_name_label = tk.Label(root, text='event name')
@@ -169,11 +146,9 @@ class Button:
         record_button = tk.Button(root, text='record', command=lambda: self.buttonRecordClick(event_entry), width=10)
 
         # 按鈕排列
-        play_button.grid(row=0, column=0, rowspan=4, columnspan=4)
-        pause_button.grid(row=0, column=4, rowspan=4, columnspan=4)
-        exit_button.grid(row=0, column=8, rowspan=4, columnspan=4)
-        # speed_up_button.grid(row=12, column=0, rowspan=2, columnspan=6)
-        # speed_down_button.grid(row=12, column=6, rowspan=2, columnspan=6)
+        play_puase_button.grid(row=0, column=0, rowspan=4, columnspan=4)
+        exit_button.grid(row=0, column=4, rowspan=4, columnspan=4)
+        apply_button.grid(row=0, column=8, rowspan=4, columnspan=4)
 
         ask_directory_button.grid(row=14, column=0, rowspan=2, columnspan=4)
         select_video_button.grid(row=14, column=4, rowspan=2, columnspan=4)
@@ -185,7 +160,6 @@ class Button:
         start_frame_entry.grid(row=4, column=4, rowspan=2, columnspan=4)
         end_frame_label.grid(row=6, column=0, rowspan=2, columnspan=4)
         end_frame_entry.grid(row=6, column=4, rowspan=2, columnspan=4)
-        apply_button.grid(row=4, column=8, rowspan=2, columnspan=4)
 
         event_name_label.grid(row=8, column=0, rowspan=2, columnspan=4)
         event_entry.grid(row=8, column=4, rowspan=2, columnspan=4)
@@ -205,7 +179,7 @@ class Button:
 
         # 循環
         root.mainloop()
-        print('button mainThread end, id= ', threading.get_ident())
+        # print('button mainThread end, id= ', threading.get_ident())
 
     def testFunction(self):
         print('change')
@@ -217,8 +191,10 @@ class Button:
 class Movie:
 
     def __init__(self, parent, start_frame=0, end_frame=1000, play_speed=1):
+
         # 母buttoon物件
         self.parent_button_object = parent
+
         # 影片播放屬性
         self.play_speed = play_speed
         self.start_frame = start_frame  # 起始影格
@@ -239,7 +215,7 @@ class Movie:
         video_capture = cv2.VideoCapture(self.movie_path)
         self.frame_rate = video_capture.get(cv2.CAP_PROP_FPS)
         self.running_frame_delay = math.ceil(1000 / (self.frame_rate * self.play_speed))
-
+        video_capture.release()
         # 母視窗
 
     def play(self):
@@ -268,16 +244,39 @@ class Movie:
             data = f.readlines()
         lx, ly, rx, ry = [], [], [], []
 
-        data_start_time, data_end_time = (data[0].split())[1], (data[len(data) - 1].split())[1]
-        target_start_time, target_end_time = (data[self.start_frame].split())[1], (data[self.end_frame].split())[1]
+        data_start_time, data_end_time = (data[0].split())[1], (data[len(data) - 1].split())[1]  # 全部整個檔案的頭最尾
+        target_start_time, target_end_time = (data[self.start_frame].split())[1], (data[self.end_frame].split())[1]  # 目標時間軸的頭尾
         prev_data_time = 0
         left_modified = False
         right_modified = False
         for each in data[self.start_frame + 1:self.end_frame]:
             temp = each.split()
+            # ----------
+            # if prev_data_time == 0:
+            #     pass
+            # elif 'Left' in each:
+            #     lx.append(temp[1])
+            #     ly.append(float(temp[4]))
+            #     left_modified = True
+            # elif 'Right' in each:
+            #     rx.append(temp[1])
+            #     ry.append(float(temp[4]))
+            #     right_modified = True
+            # else: # 代表不是left也不是right
+            #     if left_modified and right_modified:
+            #         continue
+            #     elif left_modified:
+            #         rx.append(prev_data_time)
+            #         ry.append(0.0)
+            #     elif right_modified:
+            #         lx.append(prev_data_time)
+            #         ly.append(0.0)
+            # ------------
+
             if 'Left' in each or 'Right' in each:
                 if prev_data_time == 0:
-                    print("error: data not start with HMD")
+                    pass
+                    # print("error: data not start with HMD")
                 elif 'Left' in each:
                     lx.append(temp[1])
                     ly.append(float(temp[4]))
@@ -360,8 +359,14 @@ class Movie:
         full_image_path = os.path.join(self.work_directory + '/full_image.png')
         full_image = cv2.imread(full_image_path)
         full_image = cv2.resize(full_image, (controller_plot.shape[1], controller_plot.shape[0]), interpolation=cv2.INTER_NEAREST)
-        # count, length = 0, end_video_frame - target_video_frame
+        count, length = 0, end_video_frame - target_video_frame
         while self.is_exit is False:
+            # 影片播放範圍
+            if count > length:
+                while self.is_exit is False:
+                    pass
+                break
+            count += 1
             # 用spinlock暫停播放
             while self.is_play is False:
                 if self.is_exit is True:

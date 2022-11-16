@@ -17,7 +17,7 @@ def selectdirectory():
 
 def data_preprocess(logdirectory):
     # 讀資料
-    with open(os.path.join(logdirectory + '/test_log.txt'), 'r') as f:
+    with open(os.path.join(logdirectory + '/log.txt'), 'r') as f:
         data = f.readlines()
 
     # 有空白行的部分清掉
