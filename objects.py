@@ -7,7 +7,7 @@ import tkinter as tk
 from tkinter import ttk
 import cv2
 from tkinter import filedialog
-
+import shutil
 
 # 變數全小寫 _ 分隔
 # class CamelCase
@@ -41,6 +41,9 @@ class Button:
     def buttonExitClick(self, root):
         if self.playing_movie is not None:
             self.playing_movie.exit()
+        image_path = os.path.join(self.work_directory+'/controller_plot.png')
+        if os.path.exists(image_path) is True:
+            os.remove(image_path)
         root.quit()
 
     def buttonApplyClick(self):
@@ -54,7 +57,17 @@ class Button:
 
     def buttonRecordClick(self, event_entry):
         name_of_event = event_entry.get()
-        events_path = os.path.join(self.work_directory + '/events.txt')
+        events_path = os.path.join(self.work_directory + '/documents/events.txt')
+        org_image_path = os.path.join(self.work_directory + '/controller_plot.png')
+        new_image_path = os.path.join(self.work_directory+'/documents/'+name_of_event+'.png')
+        documents_dir_path = os.path.join(self.work_directory + '/documents/')
+        # 創資料夾
+        if os.path.exists(documents_dir_path) is False:
+            os.mkdir(documents_dir_path)
+        # 複製影像
+        shutil.copyfile(org_image_path,new_image_path)
+
+
         with open(events_path, 'a') as f:
             f.writelines(name_of_event + ' ' + str(self.start_frame) + ' ' + str(self.end_frame) + '\n')
 
