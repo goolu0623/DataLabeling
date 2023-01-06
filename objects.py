@@ -1,3 +1,4 @@
+import enum
 import os.path
 import threading
 import matplotlib.pyplot as plt
@@ -9,9 +10,16 @@ import cv2
 from tkinter import filedialog
 import shutil
 
+
 # 變數全小寫 _ 分隔
 # class CamelCase
 # function camelCase
+
+
+class ButtonType(enum.Enum):
+    ask_dir = 3
+    movie_path = 9
+    complete = 87
 
 
 class Button:
@@ -31,6 +39,10 @@ class Button:
         self.end_frame = 0
         self.graph_type = 0
         self.playing_movie = Movie(self)
+        print(ButtonType(3))
+        print(ButtonType.complete == 87)
+        # print(ButtonType.complete)
+        # ButtonType.complete
 
     def buttonPlayPauseClick(self):
         if self.playing_movie.is_play:
@@ -41,7 +53,7 @@ class Button:
     def buttonExitClick(self, root):
         if self.playing_movie is not None:
             self.playing_movie.exit()
-        image_path = os.path.join(self.work_directory+'/controller_plot.png')
+        image_path = os.path.join(self.work_directory + '/controller_plot.png')
         if os.path.exists(image_path) is True:
             os.remove(image_path)
         root.quit()
@@ -59,14 +71,13 @@ class Button:
         name_of_event = event_entry.get()
         events_path = os.path.join(self.work_directory + '/documents/events.txt')
         org_image_path = os.path.join(self.work_directory + '/controller_plot.png')
-        new_image_path = os.path.join(self.work_directory+'/documents/'+name_of_event+'.png')
+        new_image_path = os.path.join(self.work_directory + '/documents/' + name_of_event + '.png')
         documents_dir_path = os.path.join(self.work_directory + '/documents/')
         # 創資料夾
         if os.path.exists(documents_dir_path) is False:
             os.mkdir(documents_dir_path)
         # 複製影像
-        shutil.copyfile(org_image_path,new_image_path)
-
+        shutil.copyfile(org_image_path, new_image_path)
 
         with open(events_path, 'a') as f:
             f.writelines(name_of_event + ' ' + str(self.start_frame) + ' ' + str(self.end_frame) + '\n')
@@ -113,7 +124,7 @@ class Button:
         root = tk.Tk()
         root.title('Buttons')  # 視窗命名
         root.geometry('330x200')  # 定義寬高
-        root.geometry('+1200+1000')  # 定義離左上多遠
+        root.geometry('+500+500')  # 定義離左上多遠
 
         # 基本按鈕
         play_puase_button = tk.Button(master=root, text='play/pause', command=self.buttonPlayPauseClick, width=10)
@@ -194,18 +205,12 @@ class Button:
         root.mainloop()
         # print('button mainThread end, id= ', threading.get_ident())
 
-    def testFunction(self):
-        print('change')
-
-    def test(self, sv):
-        print('sv = ', sv.get())
-
 
 class Movie:
 
     def __init__(self, parent, start_frame=0, end_frame=1000, play_speed=1):
 
-        # 母buttoon物件
+        # 母button物件
         self.parent_button_object = parent
 
         # 影片播放屬性
@@ -240,7 +245,7 @@ class Movie:
     def exit(self):
         self.is_exit = True
 
-    def speedChange(self, targetSpeed=1):
+    def speedChange(self, targetSpeed=1.0):
         self.play_speed = targetSpeed
         self.running_frame_delay = math.ceil(1000 / (self.frame_rate * self.play_speed))
 
@@ -264,27 +269,6 @@ class Movie:
         right_modified = False
         for each in data[self.start_frame + 1:self.end_frame]:
             temp = each.split()
-            # ----------
-            # if prev_data_time == 0:
-            #     pass
-            # elif 'Left' in each:
-            #     lx.append(temp[1])
-            #     ly.append(float(temp[4]))
-            #     left_modified = True
-            # elif 'Right' in each:
-            #     rx.append(temp[1])
-            #     ry.append(float(temp[4]))
-            #     right_modified = True
-            # else: # 代表不是left也不是right
-            #     if left_modified and right_modified:
-            #         continue
-            #     elif left_modified:
-            #         rx.append(prev_data_time)
-            #         ry.append(0.0)
-            #     elif right_modified:
-            #         lx.append(prev_data_time)
-            #         ly.append(0.0)
-            # ------------
 
             if 'Left' in each or 'Right' in each:
                 if prev_data_time == 0:

@@ -236,7 +236,7 @@ def validate_test(log_directory):
 
 
 debug = False  # debug mode 才會存出其他的txt
-time_window = 4  # 2ms以內的都會辨識為對稱訊號
+time_window = 4  # 多少ms以內的都會辨識為對稱訊號
 if __name__ == '__main__':
     # print(sys.argv)
     path = selectdirectory()
