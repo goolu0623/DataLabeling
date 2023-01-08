@@ -1,6 +1,6 @@
 # VibrationLabeler
 
-From https://github.com/goolu0623/CrossHaptics/blob/master/README.md you can generate and saved the vibration signals data via polling OpenVr api during the gameplay.
+From https://github.com/goolu0623/CrossHaptics you can generate and saved the vibration signals data via polling OpenVr api during the gameplay.
 
 Use the Preprocess.py to deal with the console.txt and modified the log format into what we want to focus on, which is vibration signals, and saved to the chosen directory.
 Use the main.py to start the labeler which can interact with your vibration signals.
