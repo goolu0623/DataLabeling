@@ -16,10 +16,10 @@ import shutil
 # function camelCase
 
 
-class ButtonType(enum.Enum):
-    ask_dir = 3
-    movie_path = 9
-    complete = 87
+# class ButtonType(enum.Enum):
+#     ask_dir = 3
+#     movie_path = 9
+#     complete = 87
 
 
 class Button:
@@ -39,8 +39,10 @@ class Button:
         self.end_frame = 0
         self.graph_type = 0
         self.playing_movie = Movie(self)
-        print(ButtonType(3))
-        print(ButtonType.complete == 87)
+        with open(self.complete_data_path, 'r') as f:
+            self.total_length = len(f.readlines())
+        # print(ButtonType(3))
+        # print(ButtonType.complete == 87)
         # print(ButtonType.complete)
         # ButtonType.complete
 
@@ -90,12 +92,18 @@ class Button:
 
     def buttonSelectCompleteDataPathClick(self, root):
         self.complete_data_path = filedialog.askopenfilename(parent=root, initialdir='~/VibrationLabeler-master', title='select the complete datalog')
+        with open(self.complete_data_path, 'r') as f:
+            self.total_length = len(f.readlines())
 
     def buttonSelectSymmetricDataPathClick(self, root):
         self.symmetric_data_path = filedialog.askopenfilename(parent=root, initialdir='~/VibrationLabeler-master', title='select the symmetric datalog')
+        with open(self.symmetric_data_path, 'r') as f:
+            self.total_length = len(f.readlines())
 
     def buttonSelectNonSymmetricDataPathClick(self, root):
         self.nonsymmetric_data_path = filedialog.askopenfilename(parent=root, initialdir='~/VibrationLabeler-master', title='select the nonsymmetric datalog')
+        with open(self.nonsymmetric_data_path, 'r') as f:
+            self.total_length = len(f.readlines())
 
     def entryStartFrameChange(self, sv):
         if sv.get() == '':
@@ -123,7 +131,7 @@ class Button:
         # 設定基本tk window的屬性
         root = tk.Tk()
         root.title('Buttons')  # 視窗命名
-        root.geometry('330x200')  # 定義寬高
+        root.geometry('390x200')  # 定義寬高
         root.geometry('+500+500')  # 定義離左上多遠
 
         # 基本按鈕
@@ -164,6 +172,8 @@ class Button:
         end_frame_variable.trace('w', lambda name, index, mode, var=end_frame_variable: self.entryEndFrameChange(var))
         end_frame_entry = tk.Entry(root, textvariable=end_frame_variable)
 
+        total_length_label = tk.Label(root, text='total data length : ' + str(self.total_length))
+
         # record按鈕
         event_name_label = tk.Label(root, text='event name')
         event_entry = tk.Entry(root)
@@ -184,6 +194,7 @@ class Button:
         start_frame_entry.grid(row=4, column=4, rowspan=2, columnspan=4)
         end_frame_label.grid(row=6, column=0, rowspan=2, columnspan=4)
         end_frame_entry.grid(row=6, column=4, rowspan=2, columnspan=4)
+        total_length_label.grid(row=4, column=8, rowspan=4, columnspan=4)
 
         event_name_label.grid(row=8, column=0, rowspan=2, columnspan=4)
         event_entry.grid(row=8, column=4, rowspan=2, columnspan=4)
