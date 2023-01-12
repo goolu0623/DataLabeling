@@ -143,6 +143,120 @@ def full_data_log(log_directory):
     plt.tight_layout()
     plt.savefig(os.path.join(log_directory + '/full_image.png'))
 
+def nonsymmetry_data_log(log_directory):
+    with open(os.path.join(log_directory + '/nonsymmetry.txt'), 'r') as f:
+        data = f.readlines()
+    start_frame, end_frame = 0, len(data) - 1
+    lx, ly, rx, ry = [], [], [], []
+    prev_data_time = 0
+    left_modified = False
+    right_modified = False
+    for each in data[start_frame + 1:end_frame]:
+        temp = each.split()
+        if 'Left' in each or 'Right' in each:
+            if prev_data_time == 0:
+                print("error: data not start with HMD")
+            elif 'Left' in each:
+                lx.append(temp[1])
+                ly.append(float(temp[4]))
+                left_modified = True
+            elif 'Right' in each:
+                rx.append(temp[1])
+                ry.append(float(temp[4]))
+                right_modified = True
+
+        else:
+            if prev_data_time == 0:
+                pass
+            elif left_modified or right_modified:
+                if left_modified and right_modified:
+                    pass
+                elif left_modified:
+                    rx.append(prev_data_time)
+                    ry.append(0.0)
+                elif right_modified:
+                    lx.append(prev_data_time)
+                    ly.append(0.0)
+            else:
+                lx.append(prev_data_time)
+                ly.append(0.0)
+                rx.append(prev_data_time)
+                ry.append(0.0)
+            prev_data_time = temp[1]
+            left_modified = False
+            right_modified = False
+    lx, ly, rx, ry = np.array(lx), np.array(ly), np.array(rx), np.array(ry)
+    fig, ax = plt.subplots(2, 1, figsize=(10, 4))
+    ax[0].set_title('Left Controller')
+    ax[0].plot(lx, ly)
+    ax[1].set_title('Right Controller')
+    ax[1].plot(rx, ry)
+    x_major_locator = plt.MultipleLocator((end_frame - start_frame) / 6)
+    ax[0].xaxis.set_major_locator(x_major_locator)
+    ax[1].xaxis.set_major_locator(x_major_locator)
+    ax[0].set_ylim([0, 1.1])
+    ax[1].set_ylim([0, 1.1])
+
+    plt.tight_layout()
+    plt.savefig(os.path.join(log_directory + '/nonsymmetry_image.png'))
+
+def symmetry_data_log(log_directory):
+    with open(os.path.join(log_directory + '/symmetry.txt'), 'r') as f:
+        data = f.readlines()
+    start_frame, end_frame = 0, len(data) - 1
+    lx, ly, rx, ry = [], [], [], []
+    prev_data_time = 0
+    left_modified = False
+    right_modified = False
+    for each in data[start_frame + 1:end_frame]:
+        temp = each.split()
+        if 'Left' in each or 'Right' in each:
+            if prev_data_time == 0:
+                print("error: data not start with HMD")
+            elif 'Left' in each:
+                lx.append(temp[1])
+                ly.append(float(temp[4]))
+                left_modified = True
+            elif 'Right' in each:
+                rx.append(temp[1])
+                ry.append(float(temp[4]))
+                right_modified = True
+
+        else:
+            if prev_data_time == 0:
+                pass
+            elif left_modified or right_modified:
+                if left_modified and right_modified:
+                    pass
+                elif left_modified:
+                    rx.append(prev_data_time)
+                    ry.append(0.0)
+                elif right_modified:
+                    lx.append(prev_data_time)
+                    ly.append(0.0)
+            else:
+                lx.append(prev_data_time)
+                ly.append(0.0)
+                rx.append(prev_data_time)
+                ry.append(0.0)
+            prev_data_time = temp[1]
+            left_modified = False
+            right_modified = False
+    lx, ly, rx, ry = np.array(lx), np.array(ly), np.array(rx), np.array(ry)
+    fig, ax = plt.subplots(2, 1, figsize=(10, 4))
+    ax[0].set_title('Left Controller')
+    ax[0].plot(lx, ly)
+    ax[1].set_title('Right Controller')
+    ax[1].plot(rx, ry)
+    x_major_locator = plt.MultipleLocator((end_frame - start_frame) / 6)
+    ax[0].xaxis.set_major_locator(x_major_locator)
+    ax[1].xaxis.set_major_locator(x_major_locator)
+    ax[0].set_ylim([0, 1.1])
+    ax[1].set_ylim([0, 1.1])
+
+    plt.tight_layout()
+    plt.savefig(os.path.join(log_directory + '/symmetry_image.png'))
+
     return
 
 
@@ -241,8 +355,11 @@ if __name__ == '__main__':
     # print(sys.argv)
     path = selectdirectory()
     data_preprocess(path)
-    full_data_log(path)
+
     symmetric_data(path)
     nonsymmetric_data(path)
+    full_data_log(path)
+    nonsymmetry_data_log(path)
+    symmetry_data_log(path)
 
     # validate_test(path)
