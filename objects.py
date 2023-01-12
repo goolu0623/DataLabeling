@@ -330,6 +330,8 @@ class Movie:
         plt.tight_layout()
         controller_plot_path = os.path.join(self.work_directory + '/controller_plot.png')
         plt.savefig(controller_plot_path)
+        fig.clf()
+        plt.close()
         return data_start_time, data_end_time, target_start_time, target_end_time
 
         pass
